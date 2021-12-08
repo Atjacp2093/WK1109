@@ -1,5 +1,21 @@
 ﻿@charset "utf-8";
-
+.current {
+    background-color: rgba(0,0,255,0.6);
+    display: inline-block;
+    border: 1px solid black;
+    width: 18px;
+    padding: 0px auto;
+    padding-left: 8px;
+}
+.orther-page {
+    background-color: rgba(0,0,255,0.2);
+    display: inline-block;
+    border: 1px solid black;
+    width: 18px;
+    padding: 0px auto;
+    padding-left: 8px;
+    text-decoration: none;
+}
 header{
   margin-top: 30px;
   color: #3a55ad;

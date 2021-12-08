@@ -1,26 +1,46 @@
-﻿<?php
+﻿﻿﻿<?php
+$limit = 5; 
 require_once("functions.php");
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
     if(isset($_POST["name"])){
         if(!empty($_POST["name"])) {
             $name = htmlspecialchars($_POST["name"], ENT_QUOTES, 'UTF-8');
         }
+        $page = 1;
+        $start = 0;
     }
+    
+}elseif($_SERVER['REQUEST_METHOD']==='GET'){
+        $page = isset($_GET['page']) ? $_GET['page'] : 1;
+        $name = htmlspecialchars($_POST["name"], ENT_QUOTES, 'UTF-8');
+        $start = ($page - 1) * $limit;
 }
+
 
 $dbh = db_conn();
 $data = [];
 
-try{
-    $sql = "SELECT * FROM user WHERE name like :name";
-    $stmt = $dbh->prepare($sql);
-    $stmt->bindValue(':name', '%'.$name.'%', PDO::PARAM_STR);
-    $stmt->execute();
-    $count = 0;
-    while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-        $data[] = $row;
-        $count++;
-    }
+    try{ 
+
+        $sql = "SELECT * FROM user WHERE name like :name LIMIT :start , $limit"; 
+    
+        $stmt = $dbh->prepare($sql); 
+    
+        $stmt->bindValue(':name', '%'.$name.'%', PDO::PARAM_STR);
+        $stmt->bindValue(':start', $start, PDO::PARAM_INT);
+        
+    
+        $stmt->execute(); 
+    
+        $count = 0; 
+    
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)){ 
+    
+            $data[] = $row; 
+    
+            $count++; 
+    
+        } 
 
 }catch (PDOException $e){
     echo($e->getMessage());
@@ -68,10 +88,47 @@ try{
     <?php endforeach; ?>
 </table>
 <p style="margin:8px;">
-<form action="" method="POST">
-<div class="button-wrapper">
-    <button type="button" onclick="history.back()">戻る</button>
+
+<form action="" method="get">
+    <div>
+        <p>現在 <?php echo $page; ?> ページ目です。</p>
+        <?php 
+
+        $stmt = $dbh->prepare("SELECT COUNT(*) id FROM user WHERE name like :name"); 
+
+        $stmt->bindValue(':name', '%'.$name.'%', PDO::PARAM_STR); 
+
+        $stmt->execute(); 
+
+        $page_num = $stmt->fetchColumn(); 
+
+        $pagination = ceil($page_num / $limit);
+        
+        ?>
+
+        <?php  
+
+            for ($x=1; $x <= $pagination ; $x++) { 
+
+                if ($x == $page ){
+                    echo '<span class="current" >'.$x.'</span>  ';
+                }
+                else{
+                    echo ' '; 
+
+                    echo '<a class="orther-page" href=?page='. $x. '&name='. $name.'>'. $x. '</a>'; 
+         
+                    echo ' '; 
+
+                }
+
+} ?> 
 </div>
+<div class="button-wrapper"> 
+
+<button type="button" onclick="history.back()">戻る</button> 
+
+</div> 
 </form>
 <hr>
 <div class="container">
